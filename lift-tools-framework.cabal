@@ -1,0 +1,62 @@
+cabal-version:      2.4
+name:               lift-tools-framework
+version:            0.1.0.0
+
+synopsis: A framework for building tool integrations with Sonatype Lift
+-- A longer description of the package.
+-- description:
+-- category:
+
+bug-reports: https://github.com/amy-keibler/lift-tools-framework
+
+author: Amy Keibler
+maintainer: amelia.keibler@gmail.com
+copyright: (c) 2021 Amy Keibler
+license: Apache-2.0 OR MIT
+license-files: LICENSE-APACHE
+             , LICENSE-MIT
+extra-source-files: README.md
+library
+    exposed-modules:    Lift.ToolIntegration
+                        Lift.ToolIntegration.Applicable
+                        Lift.ToolIntegration.Cli
+                        Lift.ToolIntegration.ToolResults
+    build-depends:      base ^>=4.14.1.0
+                      , relude >= 1.0.0 && < 1.1
+                      , aeson >= 1.5.6 && < 1.6
+                      , optparse-applicative >= 0.16.1 && < 0.17
+    hs-source-dirs:     src
+    default-language:   Haskell2010
+    ghc-options:        -threaded -Wall -Werror -rtsopts
+    default-extensions: NoImplicitPrelude
+                      , OverloadedStrings
+
+test-suite lift-tools-framework-tests
+    type:               exitcode-stdio-1.0
+    main-is:            Spec.hs
+    other-modules:      Lift.ToolIntegrationSpec
+                        Lift.ToolIntegration.ApplicableSpec
+    build-depends:      base ^>=4.14.1.0
+                      , lift-tools-framework
+                      , relude >= 1.0.0 && < 1.1
+                      , aeson >= 1.5.6 && < 1.6
+                      , hspec
+                      , raw-strings-qq
+    hs-source-dirs:     test
+    default-language:   Haskell2010
+    ghc-options:        -threaded -Wall -Werror -rtsopts
+    default-extensions: NoImplicitPrelude
+                      , OverloadedStrings
+
+
+executable lift-tools-framework-example
+    main-is:            Main.hs
+    build-depends:      base ^>=4.14.1.0
+                      , lift-tools-framework
+                      , relude >= 1.0.0 && < 1.1
+                      , optparse-applicative >= 0.16.1 && < 0.17
+    hs-source-dirs:     example
+    default-language:   Haskell2010
+    ghc-options:        -threaded -Wall -Werror -rtsopts
+    default-extensions: NoImplicitPrelude
+                      , OverloadedStrings
