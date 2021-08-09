@@ -1,9 +1,12 @@
 module Lift.ToolIntegration.Applicable
   ( Applicability (..)
-  , CheckApplicability (..)
+  , ApplicabilityCondition (..)
   , determineApplicability
   , toApiResponse
   ) where
+
+import Lift.ToolIntegration.Project
+import Text.RE.TDFA.Text (RE, matched, (?=~))
 
 import Relude
 
@@ -24,11 +27,17 @@ toApiResponse :: Applicability -> Bool
 toApiResponse Applicable = True
 toApiResponse _ = False
 
-data CheckApplicability
+data ApplicabilityCondition
   = AlwaysApplicable
-  | ApplicableIfFileIsPresent Text
-  deriving (Eq, Show)
+  | ApplicableIfFileIsPresent RE
+  | MultipleConditions (NonEmpty ApplicabilityCondition)
 
-determineApplicability :: CheckApplicability -> IO Applicability
+determineApplicability :: (MonadProject m) => ApplicabilityCondition -> m Applicability
 determineApplicability AlwaysApplicable = pure Applicable
-determineApplicability (ApplicableIfFileIsPresent _filePattern) = error "To implement"
+determineApplicability (MultipleConditions conditions) = fold <$> traverse determineApplicability conditions
+determineApplicability (ApplicableIfFileIsPresent filePattern) = foldMap checkFileApplicability <$> listFiles 
+  where
+    checkFileApplicability :: Text -> Applicability
+    checkFileApplicability filepath = if matched $ filepath ?=~ filePattern
+      then Applicable
+      else NotApplicable
