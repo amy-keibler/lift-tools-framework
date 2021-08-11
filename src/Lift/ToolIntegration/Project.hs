@@ -11,9 +11,6 @@ import Relude
 class (Monad m) => MonadProject m where
   listFiles :: m [Text]
 
-instance MonadProject IO where
-  listFiles = error "TODO: implement"
-
 data ProjectContext = ProjectContext
   { projectRoot :: Text
   }
@@ -27,7 +24,6 @@ instance (MonadIO m) => MonadProject (ReaderT ProjectContext m) where
 
 listAllFiles :: (MonadIO m) => String -> m [String]
 listAllFiles folder = do
-  liftIO $ putStrLn ("listing: " <> folder)
   contents <- liftIO $ listDirectory (toString folder)
   (folders, files) <- liftIO $ partitionFiles (mappend (folder <> "/") <$> contents)
   subFiles <- join <$> traverse listAllFiles folders

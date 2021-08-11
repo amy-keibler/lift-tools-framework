@@ -19,6 +19,7 @@ extra-source-files: README.md
 library
     exposed-modules:    Lift.ToolIntegration
                         Lift.ToolIntegration.Applicable
+                        Lift.ToolIntegration.Applicable.Regex
                         Lift.ToolIntegration.Cli
                         Lift.ToolIntegration.Project
                         Lift.ToolIntegration.ToolResults
