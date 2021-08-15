@@ -30,7 +30,9 @@ toApiResponse _ = False
 data ApplicabilityCondition
   = AlwaysApplicable
   | ApplicableIfFileIsPresent RE
+  -- ^ Applicable if a regular expression matches any file in the repository
   | MultipleConditions (NonEmpty ApplicabilityCondition)
+  -- ^ Applicable if any of the sub-conditions are applicable
 
 determineApplicability :: (MonadProject m) => ApplicabilityCondition -> m Applicability
 determineApplicability AlwaysApplicable = pure Applicable
