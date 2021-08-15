@@ -19,6 +19,7 @@ import           Relude
 -- | The configuration for your Haskell application
 data ToolApplication = ToolApplication
   { applicabilityCondition :: ApplicabilityCondition
+  -- ^ The condition used to determine if a your tool should run on a particular repository
   }
 
 -- | The entry-point for your Haskell application
