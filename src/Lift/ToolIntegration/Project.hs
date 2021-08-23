@@ -2,25 +2,44 @@
 module Lift.ToolIntegration.Project
   ( MonadProject(..)
   , ProjectContext(..)
+  , RunCommandError(..)
   ) where
 
 import System.Directory
+import System.Exit (ExitCode(..))
 import System.FilePath.Posix (makeRelative)
+import qualified System.Process.Typed as TP
 import Relude
 
 class (Monad m) => MonadProject m where
+  getProjectRoot :: m Text
   listFiles :: m [Text]
+  runCommand :: Text -> [Text] -> [(Text, Text)] -> m (Either RunCommandError Text)
+
+data RunCommandError
+  = RunFailed
+    { code :: Int
+    , output :: Text
+    , errorOutput :: Text
+    }
+  deriving (Eq, Show)
 
 data ProjectContext = ProjectContext
   { projectRoot :: Text
   }
 
 instance (MonadIO m) => MonadProject (ReaderT ProjectContext m) where
+  getProjectRoot = asks projectRoot
   listFiles = do
     folder <- asks projectRoot
     let f = toString folder
     allFiles <- listAllFiles f
     pure $ toText . makeRelative f <$> allFiles
+  runCommand exe args env = do
+    let process = TP.setEnv (bimap toString toString <$> env)
+          $ TP.proc (toString exe) (toString <$> args)
+    out <- TP.readProcess process
+    pure $ handleProcessOutput out
 
 listAllFiles :: (MonadIO m) => String -> m [String]
 listAllFiles folder = do
@@ -39,3 +58,12 @@ listAllFiles folder = do
         (True, False) -> (file : folders, files)
         (False, True) -> (folders , file : files)
         (_, _) -> (folders, files)
+
+handleProcessOutput :: (ExitCode, LByteString, LByteString) -> Either RunCommandError Text
+handleProcessOutput (ExitSuccess, o, _) = Right $ decodeUtf8 o
+handleProcessOutput (ExitFailure c, o, e) = Left $ RunFailed
+  { code = c
+  , output = decodeUtf8 o
+  , errorOutput = decodeUtf8 e
+  }
+

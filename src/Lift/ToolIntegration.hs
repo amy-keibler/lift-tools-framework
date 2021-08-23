@@ -2,6 +2,7 @@
 module Lift.ToolIntegration
   ( module Lift.ToolIntegration.Applicable
   , module Lift.ToolIntegration.Project
+  , module Lift.ToolIntegration.Run
   , module Lift.ToolIntegration.ToolResults
   , ToolApplication(..)
   , runToolMain
@@ -11,6 +12,7 @@ import           Data.Aeson
 import           Lift.ToolIntegration.Applicable
 import           Lift.ToolIntegration.Cli
 import           Lift.ToolIntegration.Project
+import           Lift.ToolIntegration.Run
 import           Lift.ToolIntegration.ToolResults
 import           Options.Applicative
 import qualified Data.Text.IO as T
@@ -20,20 +22,23 @@ import           Relude
 data ToolApplication = ToolApplication
   { applicabilityCondition :: ApplicabilityCondition
   -- ^ The condition used to determine if a your tool should run on a particular repository
+  , runTemplate :: RunTemplate
+  -- ^ The template used to produce tool results from the repository
   }
 
 -- | The entry-point for your Haskell application
-runToolMain :: ToolApplication -> IO ()
+runToolMain :: (ProjectContext -> ToolApplication) -> IO ()
 runToolMain toolApplication = execParser application >>= runTool toolApplication
 
-runTool :: ToolApplication -> Cli -> IO ()
-runTool ToolApplication{..} Cli{..} = do
+runTool :: (ProjectContext -> ToolApplication) -> Cli -> IO ()
+runTool toolApplicationFromContext Cli{..} = do
   let projectContext = ProjectContext { projectRoot = projectFolder }
+      ToolApplication {..} = toolApplicationFromContext projectContext
   usingReaderT projectContext $ do
     case cliAction of
       CheckIfApplicable -> applicable applicabilityCondition
       OutputApiVersion -> version
-      Run -> run
+      Run -> run runTemplate
 
 applicable :: (MonadProject m, MonadIO m) => ApplicabilityCondition -> m ()
 applicable applicabilityCondition = do
@@ -43,8 +48,8 @@ applicable applicabilityCondition = do
 version :: (MonadIO m) => m ()
 version = outputJson (1 :: Int)
 
-run :: (MonadIO m) => m ()
-run = outputJson ([] :: [ToolResult])
+run :: (MonadProject m, MonadIO m) => RunTemplate -> m ()
+run runTemplate = executeTemplate runTemplate >>= outputJson
 
 outputJson :: (ToJSON a, MonadIO m) => a -> m ()
 outputJson = liftIO . T.putStrLn . decodeUtf8 . encode

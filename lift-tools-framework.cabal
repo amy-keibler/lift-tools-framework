@@ -22,6 +22,7 @@ library
                         Lift.ToolIntegration.Applicable.Regex
                         Lift.ToolIntegration.Cli
                         Lift.ToolIntegration.Project
+                        Lift.ToolIntegration.Run
                         Lift.ToolIntegration.ToolResults
     build-depends:      base ^>=4.14.1.0
                       , relude >= 1.0.0 && < 1.1
@@ -31,6 +32,7 @@ library
                       , HMock >= 0.3.0 && < 0.4
                       , optparse-applicative >= 0.16.1 && < 0.17
                       , regex >= 1.1.0 && < 1.2
+                      , typed-process >= 0.2.6 && < 0.3
     hs-source-dirs:     src
     default-language:   Haskell2010
     ghc-options:        -threaded -Wall -Werror -rtsopts
@@ -43,6 +45,7 @@ test-suite lift-tools-framework-tests
     other-modules:      Lift.ToolIntegrationSpec
                         Lift.ToolIntegration.ApplicableSpec
                         Lift.ToolIntegration.ProjectSpec
+                        Lift.ToolIntegration.RunSpec
                         Mock.Project
     build-depends:      base ^>=4.14.1.0
                       , lift-tools-framework
@@ -66,7 +69,7 @@ executable lift-tools-framework-example
     build-depends:      base ^>=4.14.1.0
                       , lift-tools-framework
                       , relude >= 1.0.0 && < 1.1
-                      , optparse-applicative >= 0.16.1 && < 0.17
+                      , aeson >= 1.5.6 && < 1.6
     hs-source-dirs:     example
     default-language:   Haskell2010
     ghc-options:        -threaded -Wall -Werror -rtsopts
