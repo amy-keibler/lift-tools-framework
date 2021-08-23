@@ -1,4 +1,3 @@
-{-# LANGUAGE RecordWildCards #-}
 module Lift.ToolIntegration.RunSpec where
 
 import Lift.ToolIntegration.Project
