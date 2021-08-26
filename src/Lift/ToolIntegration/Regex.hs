@@ -1,4 +1,4 @@
-module Lift.ToolIntegration.Applicable.Regex
+module Lift.ToolIntegration.Regex
   ( module Text.RE.TDFA.Text
   ) where
 

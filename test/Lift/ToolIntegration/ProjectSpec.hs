@@ -17,6 +17,12 @@ spec = do
           createDirectory (toString folder <> "/folder/")
           writeFile (toString folder <> "/folder/secondLevelFile.log") ""
           listFilesInProject folder `shouldReturn` ["topLevelFile.txt", "folder/secondLevelFile.log"]
+      describe "contentsOfFile" $ do
+        it "should read the contents of a file that exists" $ \folder -> do
+          writeFile (toString folder <> "/contents.txt") "content"
+          contentsOfFileInProject folder "contents.txt" `shouldReturn` "content"
+        it "should fail to read the contents of a file that does not exist" $ \folder -> do
+          contentsOfFileInProject folder "contents.txt" `shouldThrow` anyException
       describe "runCommand" $ do
         it "should execute a process with arguments" $ \folder -> do
           runCommandInProject "echo" ["Hello world!"] [] folder `shouldReturn` (Right "Hello world!\n")
@@ -28,6 +34,10 @@ spec = do
 listFilesInProject :: Text -> IO [Text]
 listFilesInProject folder = let project = ProjectContext { projectRoot = folder }
                     in usingReaderT project listFiles
+
+contentsOfFileInProject :: Text -> Text -> IO Text
+contentsOfFileInProject folder file = let project = ProjectContext { projectRoot = folder }
+                    in usingReaderT project (contentsOfFile file)
 
 runCommandInProject :: Text -> [Text] -> [(Text, Text)] -> Text -> IO (Either RunCommandError Text)
 runCommandInProject exe args env folder = let project = ProjectContext { projectRoot = folder }

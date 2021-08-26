@@ -19,9 +19,9 @@ extra-source-files: README.md
 library
     exposed-modules:    Lift.ToolIntegration
                         Lift.ToolIntegration.Applicable
-                        Lift.ToolIntegration.Applicable.Regex
                         Lift.ToolIntegration.Cli
                         Lift.ToolIntegration.Project
+                        Lift.ToolIntegration.Regex
                         Lift.ToolIntegration.Run
                         Lift.ToolIntegration.ToolResults
     build-depends:      base ^>=4.14.1.0
