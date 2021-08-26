@@ -1,6 +1,7 @@
 {-# LANGUAGE RecordWildCards #-}
 module Lift.ToolIntegration.Run
-  ( OutputTranslator
+  ( FileContents(..)
+  , ProcessOutputTranslator
   , RunTemplate(..)
   , executeTemplate
   ) where
@@ -8,19 +9,29 @@ module Lift.ToolIntegration.Run
 import Lift.ToolIntegration.Project
 import Lift.ToolIntegration.ToolResults
 import System.FilePath.Posix (makeRelative)
+import Text.RE.TDFA.Text
 
 import Relude
 
-type OutputTranslator
+type ProcessOutputTranslator
   =  Text -- ^ The output from executing the process
   -> [ToolResult]
+
+data FileContents = FileContents
+  { fileName :: Text
+  , fileContent :: Text
+  }
 
 data RunTemplate
   = RunProcess
     { processName :: Text
     , processArgs :: [Text]
     , processEnv :: [(Text, Text)]
-    , outputToToolResults :: OutputTranslator
+    , outputToToolResults :: ProcessOutputTranslator
+    }
+  | RunPerFile
+    { fileFilter :: RE
+    , fileContentsToToolResults :: FileContents -> [ToolResult]
     }
 
 executeTemplate :: (MonadProject m) => RunTemplate -> m [ToolResult]
@@ -30,6 +41,20 @@ executeTemplate RunProcess {..} = do
   case result of
     Right r -> pure $ makeFilePathRelative projectRoot <$> outputToToolResults r
     Left _ -> pure [] -- TODO: log errors
+executeTemplate RunPerFile {..} = do
+  projectRoot <- getProjectRoot
+  files <- filter (\f -> matched $ f ?=~ fileFilter) <$> listFiles
+  fileContents <- traverse toFileContents files
+  pure $ makeFilePathRelative projectRoot <$> foldMap fileContentsToToolResults fileContents
+  where
+    toFileContents :: MonadProject m => Text -> m FileContents
+    toFileContents file = do
+      contents <- contentsOfFile file
+      pure FileContents
+        { fileName = file
+        , fileContent = contents
+        }
+
 
 makeFilePathRelative :: Text -> ToolResult -> ToolResult
 makeFilePathRelative projectRoot ToolResult {..} = let f = toText $ makeRelative (toString projectRoot) (toString file)

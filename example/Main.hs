@@ -6,7 +6,7 @@ module Main where
 
 import Data.Aeson
 import Lift.ToolIntegration
-import Lift.ToolIntegration.Applicable.Regex
+import Lift.ToolIntegration.Regex
 import Relude
 
 application :: ProjectContext -> ToolApplication

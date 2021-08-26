@@ -14,6 +14,7 @@ import Relude
 class (Monad m) => MonadProject m where
   getProjectRoot :: m Text
   listFiles :: m [Text]
+  contentsOfFile :: Text -> m Text -- TODO: This should never fail when used correctly, but we should handle that failure correctly when we add error handling (issue #7)
   runCommand :: Text -> [Text] -> [(Text, Text)] -> m (Either RunCommandError Text)
 
 data RunCommandError
@@ -35,6 +36,10 @@ instance (MonadIO m) => MonadProject (ReaderT ProjectContext m) where
     let f = toString folder
     allFiles <- listAllFiles f
     pure $ toText . makeRelative f <$> allFiles
+  contentsOfFile file = do
+    folder <- asks projectRoot
+    let filePath = toString $ folder <> "/" <> file
+    readFileText filePath
   runCommand exe args env = do
     let process = TP.setEnv (bimap toString toString <$> env)
           $ TP.proc (toString exe) (toString <$> args)
