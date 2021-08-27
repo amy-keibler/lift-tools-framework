@@ -1,5 +1,7 @@
 # Lift Tools Framework
 
+[![Unit Tests](https://github.com/amy-keibler/lift-tools-framework/actions/workflows/tests.yml/badge.svg)](https://github.com/amy-keibler/lift-tools-framework/actions/workflows/tests.yml)
+
 ## Purpose
 
 This project exists to enable development of custom tool integrations for [Sonatype Lift](https://lift.sonatype.com). Lift enables you to create custom tools to tailor Lift's analysis to your particular project's needs.
