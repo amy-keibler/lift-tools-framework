@@ -64,8 +64,8 @@ test-suite lift-tools-framework-tests
                       , OverloadedStrings
 
 
-executable lift-tools-framework-example
-    main-is:            Main.hs
+executable example-run-process
+    main-is:            RunProcessMain.hs
     build-depends:      base ^>=4.14.1.0
                       , lift-tools-framework
                       , relude >= 1.0.0 && < 1.1
