@@ -75,3 +75,16 @@ executable example-run-process
     ghc-options:        -threaded -Wall -Werror -rtsopts
     default-extensions: NoImplicitPrelude
                       , OverloadedStrings
+
+executable example-run-per-file
+    main-is:            RunPerFileMain.hs
+    build-depends:      base ^>=4.14.1.0
+                      , lift-tools-framework
+                      , relude >= 1.0.0 && < 1.1
+                      , hadolint
+                      , language-docker
+    hs-source-dirs:     example
+    default-language:   Haskell2010
+    ghc-options:        -threaded -Wall -Werror -rtsopts
+    default-extensions: NoImplicitPrelude
+                      , OverloadedStrings

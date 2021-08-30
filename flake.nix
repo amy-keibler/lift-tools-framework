@@ -22,10 +22,16 @@
               };
               shell.withHoogle = true;
               shell.exactDeps = true;
+              modules = [{
+                # ShellCheck Haddock broken on 0.7.2: https://github.com/koalaman/shellcheck/issues/2216
+                packages.ShellCheck.doHaddock = false;
+              }];
             };
         })
       ];
-      pkgs = import nixpkgs { inherit system overlays; };
+      pkgs = import nixpkgs {
+        inherit system overlays;
+      };
       flake = pkgs.lift-tools-framework.flake {
         crossPlatforms = p: [];
       };
