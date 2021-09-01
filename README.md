@@ -20,7 +20,13 @@ We include examples of real, complete tools that demonstrate the value of using 
 
 ### Run Process Template Example
 
-The `example-run-process` example demonstrates using this framework to define a custom tool that runs `tslint` when there is a `tsconfig.json` file inside the repository and transforms the JSON output into `ToolResult`s that can be understood by Lift.
+The `example-run-process` example demonstrates using this framework to define a custom tool that runs [`tslint`](https://github.com/palantir/tslint) when there is a `tsconfig.json` file inside the repository and transforms the JSON output into `ToolResult`s that can be understood by Lift.
+
+### Run Per-File Template Example
+
+The `example-run-per-file` example demonstrates using this framework to define a custom tool that runs [`hadolint`](https://github.com/hadolint/hadolint) as a Haskell library to parse any `Dockerfile`s in the repository for errors. The purpose of this example is to demonstrate the ease of integrating Haskell's robust collection of parsers into Lift without needing to worry about `IO`, filesystem concerns, the expected output format, or any other tangential details.
+
+**Note: `hadolint`, and therefore this _specific_ example is licensed under the GPL. Please be aware those license obligations are different from this library's MIT + Apache 2.0 licensing. This is unlikely to impact you if you are using this example as a custom Lift tool, but distributing it to others requires making the source available to them.**
 
 ## Development Nix Setup
 

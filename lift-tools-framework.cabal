@@ -83,6 +83,7 @@ executable example-run-per-file
                       , relude >= 1.0.0 && < 1.1
                       , hadolint
                       , language-docker
+                      , megaparsec
     hs-source-dirs:     example
     default-language:   Haskell2010
     ghc-options:        -threaded -Wall -Werror -rtsopts
