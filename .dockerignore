@@ -1,0 +1,6 @@
+.direnv/
+.github/
+dist-newstyle/
+flake.lock
+flake.nix
+build-example-binaries.sh

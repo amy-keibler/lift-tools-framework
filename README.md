@@ -28,6 +28,20 @@ The `example-run-per-file` example demonstrates using this framework to define a
 
 **Note: `hadolint`, and therefore this _specific_ example is licensed under the GPL. Please be aware those license obligations are different from this library's MIT + Apache 2.0 licensing. This is unlikely to impact you if you are using this example as a custom Lift tool, but distributing it to others requires making the source available to them.**
 
+## Compiling and Using a Custom Tool
+
+Lift tools are run in an Ubuntu 20.04 docker image. To ensure that your binary will run inside that container, a [`build-example-binaries.sh`](./build-example-binaries.sh) script and a [`Dockerfile`](./Dockerfile) are provided as examples. The script builds the `Dockerfile`, which compiles the `cabal` project to produce the tool binaries. The script then copies the binaries to the host filesystem so they can be uploaded to the internet.
+
+Once the files are available on the internet, make a `.lift.toml` file with the following in the repository that you want to use the tool.
+
+```toml
+customTools = ["https://your.custom/tool/download/url"]
+```
+
+[reference](https://help.sonatype.com/lift/configuration-reference#ConfigurationReference-apis-for-custom-tools)
+
+ Lift will fetch the tool from this URL, so ensure it does not require any authentication credentials or use a `setup` script in the `.lift.toml` file to download the tool.
+
 ## Development Nix Setup
 
 This project uses a [Nix Flake](https://nixos.wiki/wiki/Flakes) to provide a consistent development and packaging environment. If you wish to use that tooling, follow the below steps:
