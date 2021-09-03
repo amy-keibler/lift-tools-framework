@@ -32,15 +32,15 @@ spec = do
           runCommandInProject "ls" ["/no/such/file"] [] folder `shouldReturn` (Left $ RunFailed { code = 2, output = "", errorOutput = "ls: cannot access '/no/such/file': No such file or directory\n" })
 
 listFilesInProject :: Text -> IO [Text]
-listFilesInProject folder = let project = ProjectContext { projectRoot = folder }
+listFilesInProject folder = let project = ProjectContext { projectRoot = folder, projectLogger = \_ _ -> pure () }
                     in usingReaderT project listFiles
 
 contentsOfFileInProject :: Text -> Text -> IO Text
-contentsOfFileInProject folder file = let project = ProjectContext { projectRoot = folder }
+contentsOfFileInProject folder file = let project = ProjectContext { projectRoot = folder, projectLogger = \_ _ -> pure () }
                     in usingReaderT project (contentsOfFile file)
 
 runCommandInProject :: Text -> [Text] -> [(Text, Text)] -> Text -> IO (Either RunCommandError Text)
-runCommandInProject exe args env folder = let project = ProjectContext { projectRoot = folder }
+runCommandInProject exe args env folder = let project = ProjectContext { projectRoot = folder, projectLogger = \_ _ -> pure () }
                     in usingReaderT project (runCommand exe args env)
 
 withTempFiles :: (Text -> IO ()) -> IO ()

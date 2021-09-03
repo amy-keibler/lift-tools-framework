@@ -4,7 +4,9 @@ module Lift.ToolIntegration.Cli
   , application
   ) where
 
+import Lift.ToolIntegration.Log(LogLevel(..))
 import Options.Applicative
+
 import Relude
 
 data Action
@@ -14,7 +16,8 @@ data Action
   deriving (Eq, Show)
 
 data Cli = Cli
-  { projectFolder :: Text
+  { configuredLogLevel :: LogLevel
+  , projectFolder :: Text
   , gitHash :: Text
   , cliAction :: Action
   } deriving (Eq, Show)
@@ -27,7 +30,8 @@ application = info (cli <**> helper)
 
 cli :: Parser Cli
 cli = Cli
-  <$> argument str (metavar "FOLDER")
+  <$> strOption (long "log-level" <> short 'l' <> value Error <> showDefault)
+  <*> argument str (metavar "FOLDER")
   <*> argument str (metavar "GIT_HASH")
   <*> hsubparser
     (  command "applicable" (info applicable (progDesc "Check if the tool is applicable to the repository"))
