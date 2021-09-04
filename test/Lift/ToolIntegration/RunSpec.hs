@@ -46,6 +46,7 @@ spec = do
 
 runProcessScenario :: Either RunCommandError Text -> (Text -> [ToolResult]) -> [ToolResult] -> IO ()
 runProcessScenario commandOutput fn expectedResult = runMockT $ do
+  expectLogging
   expect $ GetProjectRoot |-> "/tmp/fake_root/"
   expect $ RunCommand "fake" ["args"] [("fake", "env")] |-> commandOutput
   result <- executeTemplate $ RunProcess
@@ -77,6 +78,7 @@ runPathScenario path expectedPath = runProcessScenario
 
 runPerFileScenarioNoMatchingFiles :: IO ()
 runPerFileScenarioNoMatchingFiles = runMockT $ do
+  expectLogging
   expect $ GetProjectRoot |-> "/tmp/fake_root"
   expect $ ListFiles |-> [f]
   result <- executeTemplate RunPerFile { fileFilter = [re|.+\.rs|], fileContentsToToolResults  = error "This should not be called because no file should match the regex" }
@@ -88,6 +90,7 @@ runPerFileScenarioNoMatchingFiles = runMockT $ do
 
 runPerFileScenarioMatchingFiles :: IO ()
 runPerFileScenarioMatchingFiles = runMockT $ do
+  expectLogging
   expectAny $ GetProjectRoot |-> "/tmp/fake_root"
   expect $ ListFiles |-> [f]
   expect $ ContentsOfFile f |-> "file contents"

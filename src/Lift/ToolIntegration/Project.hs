@@ -48,14 +48,17 @@ instance (MonadIO m) => MonadProject (ReaderT ProjectContext m) where
   getProjectRoot = asks projectRoot
   listFiles = do
     folder <- asks projectRoot
+    logTrace $ "Listing the files in " <> folder
     let f = toString folder
     allFiles <- listAllFiles f
     pure $ toText . makeRelative f <$> allFiles
   contentsOfFile file = do
     folder <- asks projectRoot
+    logTrace $ "Retrieving the contents of " <> file <> " in " <> folder
     let filePath = toString $ folder <> "/" <> file
     readFileText filePath
   runCommand exe args env = do
+    logTrace $ "Running " <> exe <> " with args " <> show args <> " and env " <> show env
     let process = TP.setEnv (bimap toString toString <$> env)
           $ TP.proc (toString exe) (toString <$> args)
     out <- TP.readProcess process

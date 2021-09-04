@@ -1,4 +1,3 @@
-{-# LANGUAGE NumericUnderscores #-}
 {-# LANGUAGE RecordWildCards    #-}
 module Lift.ToolIntegration
   ( module Lift.ToolIntegration.Applicable
@@ -18,9 +17,7 @@ import           Lift.ToolIntegration.Project
 import           Lift.ToolIntegration.Run
 import           Lift.ToolIntegration.ToolResults
 import           Options.Applicative
-import           System.Directory
-import           System.Environment (getProgName)
-import           System.Log.FastLogger
+import           System.Log.FastLogger (TimedFastLogger)
 
 import           Relude
 
@@ -36,16 +33,7 @@ data ToolApplication = ToolApplication
 runToolMain :: (ProjectContext -> ToolApplication) -> IO ()
 runToolMain toolApplication = do
   cli <- execParser application
-  programName <- getProgName
-  outputFile <- getXdgDirectory XdgData programName
-  createDirectoryIfMissing True outputFile
-  let loggerType = LogFile (FileLogSpec
-                             { log_file = outputFile <> "/lift_tool_output.log" 
-                             , log_file_size = 1_000_000_000
-                             , log_backup_number = 2
-                             }) 1024
-  timeCache <- newTimeCache "%Y-%m-%d %H:%M:%S"
-  withTimedFastLogger timeCache loggerType (runTool toolApplication cli)
+  withLogger (runTool toolApplication cli)
 
 runTool :: (ProjectContext -> ToolApplication) -> Cli -> TimedFastLogger -> IO ()
 runTool toolApplicationFromContext Cli{..} fastLogger = do
@@ -54,6 +42,7 @@ runTool toolApplicationFromContext Cli{..} fastLogger = do
                                       }
       ToolApplication {..} = toolApplicationFromContext projectContext
   usingReaderT projectContext $ do
+    logDebug $ "Project: " <> projectFolder
     case cliAction of
       CheckIfApplicable -> applicable applicabilityCondition
       OutputApiVersion -> version
@@ -61,16 +50,20 @@ runTool toolApplicationFromContext Cli{..} fastLogger = do
 
 applicable :: (MonadProject m, MonadIO m) => ApplicabilityCondition -> m ()
 applicable applicabilityCondition = do
-  logDebug "Checking applicability"
+  logDebug "Started Checking Applicability"
   response <- toApiResponse <$> determineApplicability applicabilityCondition
-  logDebug $ "Applicable = " <> show response
   outputJson response
+  logDebug $ "Applicable = " <> show response
+  logDebug "Completed Checking Applicability"
 
 version :: (MonadIO m) => m ()
 version = outputJson (1 :: Int)
 
 run :: (MonadProject m, MonadIO m) => RunTemplate -> m ()
-run runTemplate = executeTemplate runTemplate >>= outputJson
+run runTemplate = do
+  logDebug "Started Running"
+  executeTemplate runTemplate >>= outputJson
+  logDebug "Completed Running"
 
 outputJson :: (ToJSON a, MonadIO m) => a -> m ()
 outputJson = liftIO . T.putStrLn . decodeUtf8 . encode
