@@ -40,7 +40,11 @@ executeTemplate RunProcess {..} = do
   result <- runCommand processName processArgs processEnv
   case result of
     Right r -> pure $ makeFilePathRelative projectRoot <$> outputToToolResults r
-    Left _ -> pure [] -- TODO: log errors
+    Left e -> do
+      logError $ "Template failed with error code: " <> show (code e)
+      logDebug $ "Error standard output: " <> output e
+      logDebug $ "Error standard error: " <> errorOutput e 
+      pure []
 executeTemplate RunPerFile {..} = do
   projectRoot <- getProjectRoot
   files <- filter (\f -> matched $ f ?=~ fileFilter) <$> listFiles

@@ -14,5 +14,9 @@ import Lift.ToolIntegration.Project
 
 import Test.HMock
 
+import Relude
+
 makeMockable ''MonadProject
 
+expectLogging :: (MonadIO m, Typeable m) => MockT m ()
+expectLogging = expectAny $ LogMessage_ anything anything

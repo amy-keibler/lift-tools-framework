@@ -1,8 +1,13 @@
+{-# LANGUAGE NumericUnderscores #-}
 module Lift.ToolIntegration.Log
   ( LogLevel(..)
   , constructLogger
+  , withLogger
   ) where
-import System.Log.FastLogger (TimedFastLogger, toLogStr)
+
+import System.Directory
+import System.Environment (getProgName)
+import System.Log.FastLogger
 
 import Relude
 
@@ -13,9 +18,9 @@ data LogLevel
   deriving (Eq, Ord, Show)
 
 instance ToText LogLevel where
-  toText Error = "ERROR"
-  toText Debug = "DEBUG"
-  toText Trace = "TRACE"
+  toText Error = "Error"
+  toText Debug = "Debug"
+  toText Trace = "Trace"
 
 instance IsString LogLevel where
   fromString "error" = Error
@@ -25,6 +30,19 @@ instance IsString LogLevel where
 
 shouldLog :: LogLevel -> LogLevel -> Bool
 shouldLog configuredLevel logStatementLevel = configuredLevel >= logStatementLevel
+
+withLogger :: (TimedFastLogger -> IO ()) -> IO ()
+withLogger action = do
+  programName <- getProgName
+  outputFile <- getXdgDirectory XdgData programName
+  createDirectoryIfMissing True outputFile
+  let loggerType = LogFile (FileLogSpec
+                             { log_file = outputFile <> "/lift_tool_output.log" 
+                             , log_file_size = 1_000_000_000
+                             , log_backup_number = 2
+                             }) 1024
+  timeCache <- newTimeCache "%Y-%m-%d %H:%M:%S"
+  withTimedFastLogger timeCache loggerType action
 
 constructLogger :: TimedFastLogger -> LogLevel -> LogLevel -> Text -> IO ()
 constructLogger logTarget configuredLevel logStatementLevel msg =
